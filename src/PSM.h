@@ -8,7 +8,7 @@ class PSM
 public:
   PSM(unsigned char sensePin, unsigned char controlPin, unsigned int range, int mode = RISING, unsigned char divider = 1, unsigned char interruptMinTimeDiff = 0);
 
-  void initTimer(uint16_t delay, TIM_TypeDef* timerInstance = TIM1);
+  void initTimer(uint16_t delay);
 
   void set(unsigned int value);
 
@@ -45,7 +45,7 @@ private:
   volatile unsigned long _lastMillis = 0;
 
   bool _psmIntervalTimerInitialized = false;
-  HardwareTimer* _psmIntervalTimer;
+  hw_timer_t* _psmIntervalTimer = nullptr;
 };
 
 extern PSM* _thePSM;

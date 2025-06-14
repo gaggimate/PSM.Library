@@ -40,13 +40,12 @@ void PSM::onZCInterrupt(void) {
   _thePSM->calculateSkipFromZC();
 
   if (_thePSM->_psmIntervalTimerInitialized) {
-    _thePSM->_psmIntervalTimer->setCount(0);
-    _thePSM->_psmIntervalTimer->resume();
+    timerRestart(_thePSM->_psmIntervalTimer);
   }
 }
 
 void PSM::onPSMTimerInterrupt(void) {
-  _thePSM->_psmIntervalTimer->pause();
+  timerStop(_thePSM->_psmIntervalTimer);
   _thePSM->updateControl(true);
 }
 
@@ -161,13 +160,12 @@ void PSM::shiftDividerCounter(char value) {
   PSM::_dividerCounter += value;
 }
 
-void PSM::initTimer(uint16_t delay, TIM_TypeDef* timerInstance) {
+void PSM::initTimer(uint16_t delay) {
   uint32_t us = delay > 1000u ? delay : delay > 55u ? 5500u : 6600u;
-
-  PSM::_psmIntervalTimer = new HardwareTimer(timerInstance);
-  PSM::_psmIntervalTimer->setOverflow(us, MICROSEC_FORMAT);
-  PSM::_psmIntervalTimer->setInterruptPriority(0, 0);
-  PSM::_psmIntervalTimer->attachInterrupt(onPSMTimerInterrupt);
+  _psmIntervalTimer = timerBegin(0, 80, true);
+  timerAttachInterrupt(_psmIntervalTimer, onPSMTimerInterrupt, false);
+  timerAlarmWrite(_psmIntervalTimer, us, true);
+  timerAlarmEnable(_psmIntervalTimer);
 
   PSM::_psmIntervalTimerInitialized = true;
 }
